@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<response>
+    <title>Temperature_1</title>
+    <description>Temperature in flat.</description>
+    <location>
+        <latitude>50.0755381</latitude>
+        <longitude>14.4378004</longitude>
+    </location>
+    <sensors>
+        <sensor id="0">
+            <values count="3">
+                <value type="temperature" unit="celsius">15.66</value>
+                <value type="temperature" unit="fahrenheit">60.20</value>
+                <value type="humidity" unit="percentage">24.50</value>
+            </values>
+        </sensor>
+        <sensor id="1">
+            <values count="2">
+                <value type="temperature" unit="celsius">12.07</value>
+                <value type="humidity" unit="percentage">17.10</value>
+            </values>
+        </sensor>
+    </sensors>
+</response>

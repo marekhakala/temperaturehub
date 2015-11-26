@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <server>
+    <listen>0.0.0.0</listen>
+    <port>8000</port>
+  </server>
+  <temperatures>
+    <temperature>
+      <hostname>127.0.0.1</hostname>
+      <port>9000</port>
+    </temperature>
+    <temperature>
+      <hostname>127.0.0.1</hostname>
+      <port>9001</port>
+    </temperature>
+  </temperatures>
+</config>
