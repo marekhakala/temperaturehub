@@ -39,8 +39,10 @@ class ConfigLoader(object):
         entity.port = self.root_element.find("server/port").text
         elements = self.root_element.findall("temperatures/temperature")
 
+        index = 0
         for element in elements:
-            entity.addTemperature({ "hostname" : element.find("hostname").text,
+            entity.addTemperature({ "id" : index, "hostname" : element.find("hostname").text,
             "port" : element.find("port").text })
+            index += 1
 
         return entity

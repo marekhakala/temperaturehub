@@ -14,4 +14,7 @@ if __name__ == '__main__':
     configuration = conf.getConfiguration()
 
     tc = TemperatureClient(configuration.temperatures[0])
-    tc.fetchData()
+    data = tc.fetchData()
+    tc.saveToDatabase(data, tc.getTemperatureId(data))
+
+    print(str(data))
