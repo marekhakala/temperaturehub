@@ -22,7 +22,6 @@ class ConfigEntity(object):
         self.updatetime = None
         self.filename = None
         self.database_filename = None
-        self.timestamp_format = None
         self.temperatures = []
 
     def addTemperature(self, temperature):
@@ -35,7 +34,7 @@ class ConfigEntity(object):
         return len(self.temperatures)
 
     def __str__(self):
-        output = " - Hostname: " + str(self.hostname) + ":" + str(self.port) + "\n"
+        output = "Hostname: " + str(self.hostname) + ":" + str(self.port) + "\n"
         output += " - Temperatures count: " + str(self.size()) + "\n"
 
         for index, temperature in enumerate(self.temperatures):

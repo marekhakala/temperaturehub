@@ -16,8 +16,12 @@
 
 import os, sys
 import sched, time
+
+import threading
 import logging
 import logging.handlers
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from time import gmtime, strftime
 
 # Import of my custom classes
@@ -27,58 +31,73 @@ from temperature_client import *
 
 # Configuration
 APPLICATION_NAME = "HTS"
-DEBUG_MODE = logging.DEBUG # Logging mode
+APPLICATION_VERSION = "0.0.1 alpha"
+
+DEBUG_MODE = logging.INFO # Log mode
 CONFIGURATION_FILE = "./config.xml"
 DATABASE_FILE = "./measurement.db"
 LOG_FILE = "./hts.log"
 
-TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S"
-UPDATETIME = 10
-
 def application_motd():
-    return "----------------------------------------------------------------------\n\
-" + get_timestamp_mark() + " >> Starting HUB Temperature server v 0.0.1 alpha\n\
-----------------------------------------------------------------------\n"
+    return str("Starting HUB Temperature server v " + APPLICATION_VERSION)
 
-def get_timestamp_mark():
-    return strftime(TIMESTAMP_FORMAT, gmtime())
-
-def load_configuration():
-    conf = ConfigLoader(CONFIGURATION_FILE)
-    print(get_timestamp_mark() + " >> Loading configuration from file: " + CONFIGURATION_FILE)
-
-    # Init configuration
-    conf.loadFile()
-    configuration = conf.getConfiguration()
-
-    configuration.filename = CONFIGURATION_FILE
-    configuration.database_filename = DATABASE_FILE
-    configuration.timestamp_format = TIMESTAMP_FORMAT
-
-    # Init logger
-    configuration.logger = logging.getLogger(APPLICATION_NAME)
-    configuration.logger.setLevel(DEBUG_MODE)
+def init_logger():
+    logger = logging.getLogger(APPLICATION_NAME)
+    logger.setLevel(DEBUG_MODE)
     logFormatter = logging.Formatter("%(asctime)s [%(levelname)s] >> %(message)s")
 
     # Rotating log file (Max size 5 MB)
     fileHandler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=(1048576*5), backupCount=7)
     fileHandler.setFormatter(logFormatter)
-    configuration.logger.addHandler(fileHandler)
+    logger.addHandler(fileHandler)
 
     # Console log
     streamHandler = logging.StreamHandler()
     streamHandler.setFormatter(logFormatter)
-    configuration.logger.addHandler(streamHandler)
+    logger.addHandler(streamHandler)
+    return logger
+
+def load_configuration():
+    # Init logger
+    logger = init_logger()
+
+    # Print application MOTD
+    print("------------------------------------------------------------------------------------")
+    logger.log(51, application_motd())
+    print("------------------------------------------------------------------------------------\n")
+
+    # Init configuration
+    conf = ConfigLoader(CONFIGURATION_FILE)
+    logger.info("Loading configuration from file: " + CONFIGURATION_FILE)
+
+    if not os.path.exists(CONFIGURATION_FILE):
+        logger.error("Configuration file " + CONFIGURATION_FILE + " not found.")
+        return None
+
+    conf.loadFile()
+    configuration = conf.getConfiguration()
+    configuration.logger = logger
+    configuration.filename = CONFIGURATION_FILE
+    configuration.database_filename = DATABASE_FILE
+
+    # Init SQLite3 database
+    logger.info("Checking SQLite3 database ...")
+
+    if not os.path.exists(DATABASE_FILE):
+        logger.error("SQLite3 database file " + DATABASE_FILE + " not found.")
+        logger.info("Creating SQLite3 database file " + DATABASE_FILE + " ...")
+        os.system("./init_db.py")
+    else:
+        logger.info("SQLite3 database file " + DATABASE_FILE + ". OK")
 
     # Log - configuration info
-    configuration.logger.info("SQLite3 database file: " + configuration.database_filename)
-    configuration.logger.info("Data sync time: " + configuration.updatetime + "s")
-    configuration.logger.info("Configuration loaded")
+    logger.info("Data sync time: " + configuration.updatetime + "s")
+    logger.info("Configuration loaded")
 
     return configuration
 
 def sync_data(sc, configuration):
-    configuration.logger.info("Data sync from temperatures...")
+    configuration.logger.info("Data sync from temperatures ...")
 
     # Data sync from temperatures
     for temperature in configuration.temperatures:
@@ -91,13 +110,42 @@ def sync_data(sc, configuration):
     # Add next run batch
     sc.enter(float(configuration.updatetime), 1, sync_data, (sc,configuration,))
 
+class ServerHandler(BaseHTTPRequestHandler):
+    def do_HEAD(s):
+        s.send_response(200)
+        s.send_header("Content-type", "text/xml")
+        s.end_headers()
+
+    def do_GET(s):
+        s.send_response(200)
+        s.send_header("Content-type", "text/xml")
+        s.end_headers()
+
+        s.wfile.write("<a></a>")
+
 if __name__ == '__main__':
-    print(application_motd())
-    # Load configuration from temperatures
+    # Load configuration from config.xml
     configuration = load_configuration()
+
+    if configuration == None:
+        sys.exit(1)
+
     #sync_data(None, configuration)
 
-    # Loop for data sync
-    s = sched.scheduler(time.time, time.sleep)
-    s.enter(float(configuration.updatetime), 1, sync_data, (s,configuration,))
-    s.run()
+    # Start HTTP server & data sync
+    try:
+        httpd = HTTPServer((configuration.hostname, int(configuration.port)), ServerHandler)
+        server_thread = threading.Thread(target=httpd.serve_forever)
+        server_thread.daemon = True
+        server_thread.start()
+        configuration.logger.info("Starting HTTP server on \
+" + str(configuration.hostname) + ":" + str(configuration.port))
+        # Loop for data sync
+        s = sched.scheduler(time.time, time.sleep)
+        s.enter(float(configuration.updatetime), 1, sync_data, (s,configuration,))
+        s.run()
+    except KeyboardInterrupt:
+        pass
+
+    configuration.logger.info("Stopping Data synchronization")
+    configuration.logger.info("Stopping HTTP server")

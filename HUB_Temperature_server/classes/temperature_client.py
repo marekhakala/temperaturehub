@@ -26,7 +26,8 @@ class SensorInfo(object):
         self.humidity = None
 
     def __str__(self):
-        return "id: " + str(self.id) + ", celsius: " + str(self.celsius) + ", fahrenheit: " + str(self.fahrenheit) + ", humidity: " + str(self.humidity)
+        return "id: " + str(self.id) + ", celsius: " + str(self.celsius) + ", fahrenheit: \
+" + str(self.fahrenheit) + ", humidity: " + str(self.humidity)
 
 class TemperatureInfo(object):
     def __init__(self):
