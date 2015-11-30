@@ -1,3 +1,18 @@
+#
+# Copyright 2015 by Marek Hakala <hakala.marek@gmail.com>
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+
 import sqlite3
 import http.client
 import xml.etree.ElementTree as ET
@@ -11,8 +26,7 @@ class SensorInfo(object):
         self.humidity = None
 
     def __str__(self):
-        return "id: " + str(self.id) + ", celsius: " + str(self.celsius)
-        + ", fahrenheit: " + str(self.fahrenheit) + ", humidity: " + str(self.humidity)
+        return "id: " + str(self.id) + ", celsius: " + str(self.celsius) + ", fahrenheit: " + str(self.fahrenheit) + ", humidity: " + str(self.humidity)
 
 class TemperatureInfo(object):
     def __init__(self):
@@ -26,17 +40,18 @@ class TemperatureInfo(object):
         self.port = None
 
     def __str__(self):
-        output = "- Temperature " + str(self.id) + "(" + str(self.title) + ")\n"
+        output = "Temperature " + str(self.id) + "(" + str(self.title) + ")\n"
         output += "- Addr: " + str(self.hostname) + ":" + str(self.port) + "\n"
         output += "- Location: " + str(self.location) + "\n"
 
         for sensor in self.sensors:
-            output += "-- " + str(sensor) + "\n"
+            output += "-- Sensor " + str(sensor) + "\n"
 
         return output
 
 class TemperatureClient(object):
-    def __init__(self, temperature):
+    def __init__(self, configuration, temperature):
+        self.configuration = configuration
         self.temperature = temperature
 
     def fetchData(self):
@@ -48,8 +63,8 @@ class TemperatureClient(object):
             response = connection.getresponse()
 
             if response.status == 200:
-                print ("- Temperature|" + str(self.temperature["hostname"])
-                 + ":" + str(self.temperature["port"]) + ": OK")
+                self.configuration.logger.info("Temperature|" + str(self.temperature["hostname"])
+                + ":" + str(self.temperature["port"]) + ": OK")
                 response_source = response.read().decode()
                 connection.close();
                 data = self.parseData(response_source)
@@ -58,8 +73,9 @@ class TemperatureClient(object):
             connection.close();
 
         except Exception as e:
-            print ("- Temperature|" + str(self.temperature["hostname"])
+            self.configuration.logger.error("Temperature|" + str(self.temperature["hostname"])
             + ":" + str(self.temperature["port"]) + ": " + str(e))
+            return None
 
     def parseData(self, data):
         root = ET.fromstring(data)
@@ -93,27 +109,30 @@ class TemperatureClient(object):
         return info
 
     def getTemperatureId(self, info):
-        connect = sqlite3.connect("./measurement.db")
+        connect = sqlite3.connect(self.configuration.database_filename)
         cursor = connect.cursor()
 
+        # Debug info
+        self.configuration.logger.debug(info)
+
         # Temperatures
-        cursor.execute("SELECT id FROM temperature WHERE temperature_id = " + str(info.id) + " \
-                                AND hostname = \"" + info.hostname + "\" \
-                                AND port = \"" + info.port + "\"")
+        values = (int(info.id), str(info.hostname), str(info.port),)
+        cursor.execute("SELECT id FROM temperature WHERE temperature_id = ? \
+                                AND hostname = ? AND port = ?", values)
+
         dataAll = cursor.fetchall()
 
         if len(dataAll) == 0:
+            values = (str(info.id), str(info.hostname), str(info.port),
+                      str(info.title), str(info.description), str(info.location[0]), str(info.location[1]),)
             result = cursor.execute("INSERT INTO temperature (temperature_id, hostname, port, title, \
-                                    description, latitude, longitude) VALUES (" + str(info.id) + ", \
-                                    \"" + str(info.hostname) + "\", \"" + str(info.port) + "\", \
-                                    \"" + str(info.title) + "\", \"" + str(info.description) + "\", \
-                                    \"" + str(info.location[0]) + "\", \"" + str(info.location[1]) + "\")")
+                                    description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)", values)
             temperature_id = result.lastrowid
 
             for sensor in info.sensors:
+                values = (str(sensor.id), str(sensor.description), str(temperature_id),)
                 cursor.execute("INSERT INTO sensor (sensor_id, description, temperature_id) \
-                                VALUES (" + str(sensor.id) + ", \"" + str(sensor.description) + "\", \
-                                \"" + str(temperature_id) + "\")")
+                                VALUES (?, ?, ?)", values)
             connect.commit()
         else:
             temperature_id = dataAll[0][0]
@@ -121,11 +140,12 @@ class TemperatureClient(object):
         return temperature_id
 
     def saveToDatabase(self, info, temperature_id):
-        connect = sqlite3.connect("./measurement.db")
+        connect = sqlite3.connect(self.configuration.database_filename)
         cursor = connect.cursor()
 
         for sensor in info.sensors:
+            values = (str(temperature_id), str(sensor.id), str(sensor.celsius),
+                      str(sensor.fahrenheit), str(sensor.humidity),)
             cursor.execute("INSERT INTO measurement (temperature_id, sensor_id, celsius, fahrenheit, humidity) \
-                            VALUES (" + str(temperature_id) + ", " + str(sensor.id) + ", \"" + str(sensor.celsius) + "\", \
-                            \"" + str(sensor.fahrenheit) + "\", \"" + str(sensor.humidity) + "\")")
+                            VALUES (?, ?, ?, ?, ?)", values)
         connect.commit()
