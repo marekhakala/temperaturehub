@@ -15,7 +15,24 @@
 
 import xml.etree.ElementTree as ET
 
+class ConfigEntitySingleton:
+    def __init__(self,_class):
+        self._class = _class
+        self.instance = None
+
+    def __call__(self, *args, **kwds):
+        if self.instance == None:
+            self.instance = self._class(*args, **kwds)
+        return self.instance
+
 class ConfigEntity(object):
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(ConfigEntity, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
     def __init__(self):
         self.hostname = None
         self.port = None
@@ -46,13 +63,14 @@ class ConfigEntity(object):
 class ConfigLoader(object):
     def __init__(self, filename):
         self.filename = filename
+        self.configSingleton = ConfigEntitySingleton(ConfigEntity)
 
     def loadFile(self):
         self.root_element = ET.parse(self.filename).getroot()
         # TODO: XML schema validation
 
     def getConfiguration(self):
-        entity = ConfigEntity()
+        entity = self.configSingleton()
         entity.updatetime = self.root_element.find("updatetime").text
         entity.hostname = self.root_element.find("server/listen").text
         entity.port = self.root_element.find("server/port").text

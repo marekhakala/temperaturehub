@@ -28,6 +28,7 @@ from time import gmtime, strftime
 sys.path.append(os.path.abspath("./classes/"))
 from config_loader import *
 from temperature_client import *
+from xml_builders import *
 
 # Configuration
 APPLICATION_NAME = "HTS"
@@ -57,6 +58,16 @@ def init_logger():
     logger.addHandler(streamHandler)
     return logger
 
+def get_configuration():
+    conf = ConfigLoader(CONFIGURATION_FILE)
+    conf.loadFile()
+
+    configuration = conf.getConfiguration()
+    configuration.filename = CONFIGURATION_FILE
+    configuration.database_filename = DATABASE_FILE
+
+    return configuration
+
 def load_configuration():
     # Init logger
     logger = init_logger()
@@ -67,18 +78,14 @@ def load_configuration():
     print("------------------------------------------------------------------------------------\n")
 
     # Init configuration
-    conf = ConfigLoader(CONFIGURATION_FILE)
     logger.info("Loading configuration from file: " + CONFIGURATION_FILE)
 
     if not os.path.exists(CONFIGURATION_FILE):
         logger.error("Configuration file " + CONFIGURATION_FILE + " not found.")
         return None
 
-    conf.loadFile()
-    configuration = conf.getConfiguration()
+    configuration = get_configuration()
     configuration.logger = logger
-    configuration.filename = CONFIGURATION_FILE
-    configuration.database_filename = DATABASE_FILE
 
     # Init SQLite3 database
     logger.info("Checking SQLite3 database ...")
@@ -111,6 +118,10 @@ def sync_data(sc, configuration):
     sc.enter(float(configuration.updatetime), 1, sync_data, (sc,configuration,))
 
 class ServerHandler(BaseHTTPRequestHandler):
+    def __init__(self, configuration, *args):
+        self.configuration = configuration
+        BaseHTTPRequestHandler.__init__(self, *args)
+
     def do_HEAD(s):
         s.send_response(200)
         s.send_header("Content-type", "text/xml")
@@ -121,7 +132,26 @@ class ServerHandler(BaseHTTPRequestHandler):
         s.send_header("Content-type", "text/xml")
         s.end_headers()
 
-        s.wfile.write("<a></a>")
+        if s.path == "/":
+            current_state = XMLCurrentState(get_configuration())
+            current_state.buildXML()
+            s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            s.wfile.write(current_state.xml())
+        elif s.path == "/history":
+            history = XMLHistory()
+            history.buildXML()
+            s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            s.wfile.write(history.xml())
+
+class HandlerConfigurationWrapper(object):
+    def __init__(self, configuration):
+        self.configuration = configuration
+
+    def handler(self, *args):
+        ServerHandler(self.configuration, *args)
+
+    def getHandler(self):
+        return self.handler
 
 if __name__ == '__main__':
     # Load configuration from config.xml
@@ -134,7 +164,8 @@ if __name__ == '__main__':
 
     # Start HTTP server & data sync
     try:
-        httpd = HTTPServer((configuration.hostname, int(configuration.port)), ServerHandler)
+        httpd = HTTPServer((configuration.hostname, int(configuration.port)),
+         HandlerConfigurationWrapper(configuration).getHandler())
         server_thread = threading.Thread(target=httpd.serve_forever)
         server_thread.daemon = True
         server_thread.start()
