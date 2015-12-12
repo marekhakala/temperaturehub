@@ -22,6 +22,8 @@ import logging
 import logging.handlers
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
+
+from datetime import datetime, timedelta
 from time import gmtime, strftime
 
 # Import of my custom classes
@@ -138,7 +140,7 @@ class ServerHandler(BaseHTTPRequestHandler):
             s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             s.wfile.write(current_state.xml())
         elif s.path == "/history":
-            history = XMLHistory()
+            history = XMLHistory(get_configuration())
             history.buildXML()
             s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             s.wfile.write(history.xml())

@@ -4,6 +4,7 @@
     <listen>0.0.0.0</listen>
     <port>8000</port>
   </server>
+  <historydays>5</historydays>
   <updatetime>10</updatetime>
   <temperatures>
     <temperature>

@@ -37,6 +37,7 @@ class ConfigEntity(object):
         self.hostname = None
         self.port = None
         self.updatetime = None
+        self.historydays = None
         self.filename = None
         self.database_filename = None
         self.temperatures = []
@@ -72,6 +73,7 @@ class ConfigLoader(object):
     def getConfiguration(self):
         entity = self.configSingleton()
         entity.updatetime = self.root_element.find("updatetime").text
+        entity.historydays = int(self.root_element.find("historydays").text)
         entity.hostname = self.root_element.find("server/listen").text
         entity.port = self.root_element.find("server/port").text
         elements = self.root_element.findall("temperatures/temperature")
