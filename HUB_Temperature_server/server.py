@@ -17,6 +17,8 @@
 import os, sys
 import sched, time
 
+import re
+import magic
 import threading
 import logging
 import logging.handlers
@@ -31,6 +33,7 @@ sys.path.append(os.path.abspath("./classes/"))
 from config_loader import *
 from temperature_client import *
 from xml_builders import *
+from file_loader import *
 
 # Configuration
 APPLICATION_NAME = "HTS"
@@ -40,6 +43,9 @@ DEBUG_MODE = logging.INFO # Log mode
 CONFIGURATION_FILE = "./config.xml"
 DATABASE_FILE = "./measurement.db"
 LOG_FILE = "./hts.log"
+
+NOT_FOUND_FILE = "notfound.html"
+ASSETS_PREFIX = "./assets/"
 
 def application_motd():
     return str("Starting HUB Temperature server v " + APPLICATION_VERSION)
@@ -130,20 +136,68 @@ class ServerHandler(BaseHTTPRequestHandler):
         s.end_headers()
 
     def do_GET(s):
-        s.send_response(200)
-        s.send_header("Content-type", "text/xml")
-        s.end_headers()
-
         if s.path == "/":
+            s.send_response(200)
+            s.send_header("Content-type", "text/xml")
+            s.end_headers()
+
             current_state = XMLCurrentState(get_configuration())
             current_state.buildXML()
             s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            s.wfile.write(b"<?xml-stylesheet type=\"text/xsl\" href=\"assets?filename=current_state.xsl\"?>")
             s.wfile.write(current_state.xml())
         elif s.path == "/history":
+            s.send_response(200)
+            s.send_header("Content-type", "text/xml")
+            s.end_headers()
+
             history = XMLHistory(get_configuration())
             history.buildXML()
             s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            s.wfile.write(b"<?xml-stylesheet type=\"text/xsl\" href=\"assets?filename=history.xsl\"?>")
             s.wfile.write(history.xml())
+        else:
+            re_ex = re.compile("[/]{1}([A-Za-z]+)[?]{1}([A-Za-z]+)[=]{1}([\S]+)")
+            re_match = re_ex.match(s.path)
+
+            if re_match:
+                params = re_match.groups()
+
+                if params[0] == "assets" and params[1] == "filename":
+                    file_path = params[2].replace("/../", "")
+                    file_path = file_path.replace("../", "")
+                    file_path = ASSETS_PREFIX + file_path
+
+                    if os.path.exists(file_path) and os.path.isfile(file_path):
+                        s.send_response(200)
+                    else:
+                        s.send_response(404)
+                        file_path = ASSETS_PREFIX + NOT_FOUND_FILE
+
+                    loader = FileLoader(file_path)
+                    mime = magic.Magic(mime=True)
+                    mime_type = mime.from_file(file_path).decode(encoding='UTF-8')
+                    s.send_header("Content-type", str(mime_type))
+
+                    loader.loadFile()
+                    content = loader.getContent()
+
+                    s.end_headers()
+                    s.wfile.write(content)
+            else:
+                s.send_response(404)
+                file_path = ASSETS_PREFIX + NOT_FOUND_FILE
+
+                loader = FileLoader(file_path)
+                mime = magic.Magic(mime=True)
+                mime_type = mime.from_file(file_path).decode(encoding='UTF-8')
+                s.send_header("Content-type", str(mime_type))
+
+                loader.loadFile()
+                content = loader.getContent()
+
+                s.end_headers()
+                s.wfile.write(content)
 
 class HandlerConfigurationWrapper(object):
     def __init__(self, configuration):

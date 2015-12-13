@@ -180,7 +180,7 @@ longitude, id FROM temperature WHERE temperature_id = ? AND hostname = ? AND por
     def buildValues(self, cursor, element, values):
         cursor.execute("SELECT m.temperature_id, m.sensor_id, m.celsius, m.fahrenheit, m.humidity, m.timestamp \
 FROM measurement m LEFT OUTER JOIN sensor s ON m.temperature_id = s.temperature_id \
-WHERE m.temperature_id = ? AND m.timestamp >= ? AND m.timestamp <= ?", values)
+WHERE m.temperature_id = ? AND m.timestamp >= ? AND m.timestamp <= ? LIMIT 20", values)
         dataMeasurement = cursor.fetchall()
 
         for measurement in dataMeasurement:
