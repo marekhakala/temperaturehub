@@ -40,24 +40,24 @@ class ConfigEntity(object):
         self.historydays = None
         self.filename = None
         self.database_filename = None
-        self.temperatures = []
+        self.thermometers = []
 
-    def addTemperature(self, temperature):
-        self.temperatures.append(temperature)
+    def addThermometer(self, thermometer):
+        self.thermometers.append(thermometer)
 
-    def removeTemperature(self, temperature):
-        self.temperatures.remove(temperature)
+    def removeThermometer(self, thermometer):
+        self.thermometers.remove(thermometer)
 
     def size(self):
-        return len(self.temperatures)
+        return len(self.thermometers)
 
     def __str__(self):
         output = "Hostname: " + str(self.hostname) + ":" + str(self.port) + "\n"
-        output += " - Temperatures count: " + str(self.size()) + "\n"
+        output += " - Thermometers count: " + str(self.size()) + "\n"
 
-        for index, temperature in enumerate(self.temperatures):
-            temp = "#" + str(index) + "|" + str(temperature["hostname"]) + ":" + str(temperature["port"])
-            output += " -- Temperature " + temp + "\n"
+        for index, thermometer in enumerate(self.thermometers):
+            thermo = "#" + str(index) + "|" + str(thermometer["hostname"]) + ":" + str(thermometer["port"])
+            output += " -- thermometer " + thermo + "\n"
 
         return output
 
@@ -76,11 +76,11 @@ class ConfigLoader(object):
         entity.historydays = int(self.root_element.find("historydays").text)
         entity.hostname = self.root_element.find("server/listen").text
         entity.port = self.root_element.find("server/port").text
-        elements = self.root_element.findall("temperatures/temperature")
+        elements = self.root_element.findall("thermometers/thermometer")
 
         index = 0
         for element in elements:
-            entity.addTemperature({ "id" : index, "hostname" : element.find("hostname").text,
+            entity.addThermometer({ "id" : index, "hostname" : element.find("hostname").text,
             "port" : element.find("port").text })
             index += 1
 

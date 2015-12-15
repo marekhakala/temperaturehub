@@ -1,4 +1,4 @@
-#!/usr/local/Cellar/python3/3.5.0/bin/python3
+#!/usr/bin/env python3
 #
 # (C) Copyright 2015 by Marek Hakala <hakala.marek@gmail.com>
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@ from time import gmtime, strftime
 # Import of my custom classes
 sys.path.append(os.path.abspath("./classes/"))
 from config_loader import *
-from temperature_client import *
+from thermometer_client import *
 from xml_builders import *
 from file_loader import *
 
@@ -48,7 +48,7 @@ NOT_FOUND_FILE = "notfound.html"
 ASSETS_PREFIX = "./assets/"
 
 def application_motd():
-    return str("Starting HUB Temperature server v " + APPLICATION_VERSION)
+    return str("Starting Temperature HUB server v " + APPLICATION_VERSION)
 
 def init_logger():
     logger = logging.getLogger(APPLICATION_NAME)
@@ -112,15 +112,15 @@ def load_configuration():
     return configuration
 
 def sync_data(sc, configuration):
-    configuration.logger.info("Data sync from temperatures ...")
+    configuration.logger.info("Data sync from thermometers ...")
 
-    # Data sync from temperatures
-    for temperature in configuration.temperatures:
-        tc = TemperatureClient(configuration, temperature)
+    # Data sync from thermometers
+    for thermometer in configuration.thermometers:
+        tc = ThermometerClient(configuration, thermometer)
         data = tc.fetchData()
 
         if data != None:
-            tc.saveToDatabase(data, tc.getTemperatureId(data))
+            tc.saveToDatabase(data, tc.getThermometerId(data))
 
     # Add next run batch
     sc.enter(float(configuration.updatetime), 1, sync_data, (sc,configuration,))

@@ -6,14 +6,14 @@
   </server>
   <historydays>5</historydays>
   <updatetime>10</updatetime>
-  <temperatures>
-    <temperature>
+  <thermometers>
+    <thermometer>
       <hostname>127.0.0.1</hostname>
       <port>9000</port>
-    </temperature>
-    <temperature>
+    </thermometer>
+    <thermometer>
       <hostname>127.0.0.1</hostname>
       <port>9001</port>
-    </temperature>
-  </temperatures>
+    </thermometer>
+  </thermometers>
 </config>

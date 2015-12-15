@@ -31,26 +31,26 @@ class XMLCurrentState(object):
         connect = sqlite3.connect(self.configuration.database_filename)
         cursor = connect.cursor()
 
-        etemperatures = ET.SubElement(self.root, "temperatures")
-        temperatures_count = 0
+        ethermometers = ET.SubElement(self.root, "thermometers")
+        thermometers_count = 0
 
-        for temperature in self.configuration.temperatures:
-            values = (int(temperature["id"]), str(temperature["hostname"]), str(temperature["port"]),)
-            cursor.execute("SELECT temperature_id, hostname, port, title, description, latitude, \
-longitude, id FROM temperature WHERE temperature_id = ? AND hostname = ? AND port = ?", values)
+        for thermometer in self.configuration.thermometers:
+            values = (int(thermometer["id"]), str(thermometer["hostname"]), str(thermometer["port"]),)
+            cursor.execute("SELECT thermometer_id, hostname, port, title, description, latitude, \
+longitude, id FROM thermometer WHERE tthermometer_id = ? AND hostname = ? AND port = ?", values)
 
-            dataTemperature = cursor.fetchall()
+            dataThermometer = cursor.fetchall()
 
-            if len(dataTemperature) == 1:
-                etemperature = ET.SubElement(etemperatures, "temperature")
-                etemperature.set("index", str(temperature["id"]))
-                temperatures_count += 1
+            if len(dataThermometer) == 1:
+                ethermometer = ET.SubElement(ethermometers, "thermometer")
+                ethermometer.set("index", str(thermometer["id"]))
+                thermometers_count += 1
 
-                self.buildInfoValues(etemperature, dataTemperature)
-                esensors = ET.SubElement(etemperature, "sensors")
+                self.buildInfoValues(ethermometer, dataThermometer)
+                esensors = ET.SubElement(ethermometer, "sensors")
 
-                values = (int(dataTemperature[0][7]),)
-                cursor.execute("SELECT sensor_id, description, temperature_id FROM sensor WHERE temperature_id = ?", values)
+                values = (int(dataThermometer[0][7]),)
+                cursor.execute("SELECT sensor_id, description, thermometer_id FROM sensor WHERE thermometer_id = ?", values)
 
                 dataSensor = cursor.fetchall()
                 esensors.set("count", str(len(dataSensor)))
@@ -62,25 +62,25 @@ longitude, id FROM temperature WHERE temperature_id = ? AND hostname = ? AND por
                     description.text = str(sensor[1])
 
                     evalues = ET.SubElement(esensor, "values")
-                    self.buildValues(cursor, evalues, (int(dataTemperature[0][7]), int(sensor[0]),))
+                    self.buildValues(cursor, evalues, (int(dataThermometer[0][7]), int(sensor[0]),))
 
-        etemperatures.set("count", str(temperatures_count))
+        ethermometers.set("count", str(thermometers_count))
 
-    def buildInfoValues(self, element, dataTemperature):
-        element.set("title", str(dataTemperature[0][3]))
+    def buildInfoValues(self, element, dataThermometer):
+        element.set("title", str(dataThermometer[0][3]))
 
         description = ET.SubElement(element, "description")
-        description.text = str(dataTemperature[0][4])
+        description.text = str(dataThermometer[0][4])
 
         elocation = ET.SubElement(element, "location")
         elatitude = ET.SubElement(elocation, "latitude")
-        elatitude.text = str(dataTemperature[0][5])
+        elatitude.text = str(dataThermometer[0][5])
         elongitude = ET.SubElement(elocation, "longitude")
-        elongitude.text = str(dataTemperature[0][6])
+        elongitude.text = str(dataThermometer[0][6])
 
     def buildValues(self, cursor, element, values):
-        cursor.execute("SELECT temperature_id, sensor_id, celsius, fahrenheit, humidity, \
-timestamp FROM measurement WHERE temperature_id = ? AND sensor_id = ? ORDER BY timestamp DESC", values)
+        cursor.execute("SELECT thermometer_id, sensor_id, celsius, fahrenheit, humidity, \
+timestamp FROM measurement WHERE thermometer_id = ? AND sensor_id = ? ORDER BY timestamp DESC", values)
 
         dataValues = cursor.fetchall()
 
@@ -120,25 +120,25 @@ class XMLHistory(object):
         to_timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         from_timestamp = (datetime.utcnow() + timedelta(days=-self.configuration.historydays)).strftime("%Y-%m-%d %H:%M:%S")
 
-        etemperatures = ET.SubElement(self.root, "temperatures")
-        temperatures_count = 0
+        ethermometers = ET.SubElement(self.root, "thermometers")
+        thermometers_count = 0
 
-        for temperature in self.configuration.temperatures:
-            values = (int(temperature["id"]), str(temperature["hostname"]), str(temperature["port"]),)
-            cursor.execute("SELECT temperature_id, hostname, port, title, description, latitude, \
-longitude, id FROM temperature WHERE temperature_id = ? AND hostname = ? AND port = ?", values)
-            dataTemperature = cursor.fetchall()
+        for thermometer in self.configuration.thermometers:
+            values = (int(thermometer["id"]), str(thermometer["hostname"]), str(thermometer["port"]),)
+            cursor.execute("SELECT thermometer_id, hostname, port, title, description, latitude, \
+longitude, id FROM thermometer WHERE thermometer_id = ? AND hostname = ? AND port = ?", values)
+            dataThermometer = cursor.fetchall()
 
-            if len(dataTemperature) == 1:
-                etemperature = ET.SubElement(etemperatures, "temperature")
-                etemperature.set("index", str(temperature["id"]))
-                temperatures_count += 1
+            if len(dataThermometer) == 1:
+                ethermometer = ET.SubElement(ethermometers, "thermometer")
+                ethermometer.set("index", str(thermometer["id"]))
+                thermometers_count += 1
 
-                self.buildInfoValues(etemperature, dataTemperature)
-                esensors = ET.SubElement(etemperature, "sensors")
+                self.buildInfoValues(ethermometer, dataThermometer)
+                esensors = ET.SubElement(ethermometer, "sensors")
 
-                values = (int(dataTemperature[0][7]),)
-                cursor.execute("SELECT sensor_id, description, temperature_id FROM sensor WHERE temperature_id = ?", values)
+                values = (int(dataThermometer[0][7]),)
+                cursor.execute("SELECT sensor_id, description, thermometer_id FROM sensor WHERE thermometer_id = ?", values)
                 dataSensor = cursor.fetchall()
 
                 esensors.set("count", str(len(dataSensor)))
@@ -149,7 +149,7 @@ longitude, id FROM temperature WHERE temperature_id = ? AND hostname = ? AND por
                     edescription = ET.SubElement(esensor, "description")
                     edescription.text = str(sensor[1])
 
-        etemperatures.set("count", str(temperatures_count))
+        ethermometers.set("count", str(thermometers_count))
 
         efilter = ET.SubElement(self.root, "filter")
         efilter_from = ET.SubElement(efilter, "from")
@@ -157,35 +157,35 @@ longitude, id FROM temperature WHERE temperature_id = ? AND hostname = ? AND por
 
         efilter_to = ET.SubElement(efilter, "to")
         efilter_to.text = str(to_timestamp)
-        efilter_temperatures_ids = ET.SubElement(efilter, "temperaturesids")
+        efilter_thermometers_ids = ET.SubElement(efilter, "thermometersids")
 
         evalues = ET.SubElement(self.root, "values")
 
-        for temperature in self.configuration.temperatures:
-            temperature_id = ET.SubElement(efilter_temperatures_ids, "temperatureid")
-            temperature_id.text = str(temperature["id"])
-            self.buildValues(cursor, evalues, (int(temperature["id"]), str(from_timestamp), str(to_timestamp),))
+        for thermometer in self.configuration.thermometers:
+            thermometer_id = ET.SubElement(efilter_thermometers_ids, "thermometerid")
+            thermometer_id.text = str(thermometer["id"])
+            self.buildValues(cursor, evalues, (int(thermometer["id"]), str(from_timestamp), str(to_timestamp),))
 
-    def buildInfoValues(self, element, dataTemperature):
-        element.set("title", str(dataTemperature[0][3]))
+    def buildInfoValues(self, element, dataThermometer):
+        element.set("title", str(dataThermometer[0][3]))
         edescription = ET.SubElement(element, "description")
-        edescription.text = str(dataTemperature[0][4])
+        edescription.text = str(dataThermometer[0][4])
 
         elocation = ET.SubElement(element, "location")
         elatitude = ET.SubElement(elocation, "latitude")
-        elatitude.text = str(dataTemperature[0][5])
+        elatitude.text = str(dataThermometer[0][5])
         elongitude = ET.SubElement(elocation, "longitude")
-        elongitude.text = str(dataTemperature[0][6])
+        elongitude.text = str(dataThermometer[0][6])
 
     def buildValues(self, cursor, element, values):
-        cursor.execute("SELECT m.temperature_id, m.sensor_id, m.celsius, m.fahrenheit, m.humidity, m.timestamp \
-FROM measurement m LEFT OUTER JOIN sensor s ON m.temperature_id = s.temperature_id \
-WHERE m.temperature_id = ? AND m.timestamp >= ? AND m.timestamp <= ? LIMIT 20", values)
+        cursor.execute("SELECT m.thermometer_id, m.sensor_id, m.celsius, m.fahrenheit, m.humidity, m.timestamp \
+FROM measurement m LEFT OUTER JOIN sensor s ON m.thermometer_id = s.thermometer_id \
+WHERE m.thermometer_id = ? AND m.timestamp >= ? AND m.timestamp <= ? LIMIT 20", values)
         dataMeasurement = cursor.fetchall()
 
         for measurement in dataMeasurement:
             esensor = ET.SubElement(element, "sensor")
-            esensor.set("temperatureid", str(measurement[0]))
+            esensor.set("thermometerid", str(measurement[0]))
             esensor.set("sensorid", str(measurement[1]))
             esensor.set("timestamp", str(measurement[5]))
 
