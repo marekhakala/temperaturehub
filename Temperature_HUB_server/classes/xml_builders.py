@@ -37,7 +37,7 @@ class XMLCurrentState(object):
         for thermometer in self.configuration.thermometers:
             values = (int(thermometer["id"]), str(thermometer["hostname"]), str(thermometer["port"]),)
             cursor.execute("SELECT thermometer_id, hostname, port, title, description, latitude, \
-longitude, id FROM thermometer WHERE tthermometer_id = ? AND hostname = ? AND port = ?", values)
+longitude, id FROM thermometer WHERE thermometer_id = ? AND hostname = ? AND port = ?", values)
 
             dataThermometer = cursor.fetchall()
 

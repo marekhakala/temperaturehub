@@ -15,7 +15,7 @@
             <hr />
             <p><b>Last update: </b> <xsl:value-of select="response/@timestamp"/> UTC | <a href="/history" class="btn btn-xs btn-default">Update</a></p>
             <p><a href="/" class="btn btn-xs btn-primary">Current state</a> | <a href="/history" class="btn btn-xs btn-primary">History</a></p>
-            <xsl:for-each select="response/temperatures/temperature">
+            <xsl:for-each select="response/thermometers/thermometer">
                 #<xsl:value-of select="@index"/> | <b><xsl:value-of select="@title"/></b> |
                 <span class="label label-default">Lat: <xsl:value-of select="location/latitude"/>, Long: <xsl:value-of select="location/longitude"/></span> | <i><xsl:value-of select="description"/></i>
 
@@ -28,7 +28,7 @@
 
             <hr />
             <p><b>Filter: </b> <xsl:value-of select="response/filter/from"/> UTC - <xsl:value-of select="response/filter/to"/> UTC</p>
-            <p><b>Temperatures Ids: </b> <xsl:for-each select="response/filter/temperaturesids/temperatureid">
+            <p><b>Thermometers Ids: </b> <xsl:for-each select="response/filter/thermometersids/thermometerid">
                 <xsl:value-of select="."/> |
               </xsl:for-each>
             </p>
@@ -36,7 +36,7 @@
 
             <table class="table table-striped table-bordered table-hover">
               <tr>
-                <th>Temperature id</th>
+                <th>Thermometer id</th>
                 <th>Sensor id</th>
                 <th>Celsius</th>
                 <th>Fahrenheit</th>
@@ -45,7 +45,7 @@
               </tr>
               <xsl:for-each select="response/values/sensor">
                 <tr>
-                  <td><xsl:value-of select="@temperatureid"/></td>
+                  <td><xsl:value-of select="@thermometerid"/></td>
                   <td><xsl:value-of select="@sensorid"/></td>
                   <td><xsl:value-of select="value[1]"/> &#176;C</td>
                   <td><xsl:value-of select="value[2]"/> &#176;F</td>

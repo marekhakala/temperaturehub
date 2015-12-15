@@ -14,7 +14,7 @@
           <div class="row text-center">
             <p><b>Last update: </b> <xsl:value-of select="response/@timestamp"/> UTC | <a href="/" class="btn btn-xs btn-default">Update</a></p>
             <p><a href="/" class="btn btn-xs btn-primary">Current state</a> | <a href="/history" class="btn btn-xs btn-primary">History</a></p>
-            <xsl:for-each select="response/temperatures/temperature">
+            <xsl:for-each select="response/thermometers/thermometer">
               <h3>
                 #<xsl:value-of select="@index"/> | <xsl:value-of select="@title"/>
                 <span class="label label-default">Lat: <xsl:value-of select="location/latitude"/>, Long: <xsl:value-of select="location/longitude"/>
