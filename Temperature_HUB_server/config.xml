@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="config.xsd">
   <server>
     <listen>0.0.0.0</listen>
     <port>8000</port>
   </server>
+  <databasefile>./measurement.db</databasefile>
+  <logfile>./hts.log</logfile>
+  <assetspath>./assets/</assetspath>
   <historydays>5</historydays>
   <updatetime>10</updatetime>
   <thermometers>

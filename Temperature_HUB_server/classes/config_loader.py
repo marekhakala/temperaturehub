@@ -40,6 +40,8 @@ class ConfigEntity(object):
         self.historydays = None
         self.filename = None
         self.database_filename = None
+        self.log_filename = None
+        self.assets_path = None
         self.thermometers = []
 
     def addThermometer(self, thermometer):
@@ -73,6 +75,9 @@ class ConfigLoader(object):
     def getConfiguration(self):
         entity = self.configSingleton()
         entity.updatetime = self.root_element.find("updatetime").text
+        entity.database_filename = self.root_element.find("databasefile").text
+        entity.log_filename = self.root_element.find("logfile").text
+        entity.assets_path = self.root_element.find("assetspath").text
         entity.historydays = int(self.root_element.find("historydays").text)
         entity.hostname = self.root_element.find("server/listen").text
         entity.port = self.root_element.find("server/port").text

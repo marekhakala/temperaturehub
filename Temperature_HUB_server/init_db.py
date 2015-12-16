@@ -15,13 +15,44 @@
 #
 
 import sqlite3
+import os, sys
 
-connect = sqlite3.connect('./measurement.db')
-cursor = connect.cursor()
+# Import of my custom classes
+sys.path.append(os.path.abspath("./classes/"))
+from config_loader import *
 
-cursor.execute("CREATE TABLE thermometer (id INTEGER PRIMARY KEY, thermometer_id INTEGER, hostname TEXT, port TEXT, title TEXT, description TEXT, latitude TEXT, longitude TEXT)")
-cursor.execute("CREATE TABLE sensor (id INTEGER PRIMARY KEY, sensor_id INTEGER, description TEXT, thermometer_id INTEGER, FOREIGN KEY (thermometer_id) REFERENCES thermometer(id))")
-cursor.execute("CREATE TABLE measurement (id INTEGER PRIMARY KEY, thermometer_id INTEGER, sensor_id INTEGER, celsius TEXT, fahrenheit TEXT, humidity TEXT, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (thermometer_id) REFERENCES thermometer(id), FOREIGN KEY (sensor_id) REFERENCES sensor(id))")
+CONFIGURATION_FILE = "./config.xml"
 
-connect.commit()
-connect.close()
+def get_configuration():
+    conf = ConfigLoader(CONFIGURATION_FILE)
+    conf.loadFile()
+
+    configuration = conf.getConfiguration()
+    configuration.filename = CONFIGURATION_FILE
+
+    return configuration
+
+if __name__ == '__main__':
+    # Load configuration from config.xml
+    configuration = load_configuration()
+
+    if configuration == None:
+        sys.exit(1)
+
+    connect = sqlite3.connect(configuration.database_filename)
+    cursor = connect.cursor()
+
+    cursor.execute("DROP TABLE IF EXISTS thermometer")
+    cursor.execute("DROP TABLE IF EXISTS sensor")
+    cursor.execute("DROP TABLE IF EXISTS measurement")
+
+    cursor.execute("CREATE TABLE thermometer (id INTEGER PRIMARY KEY, thermometer_id INTEGER, hostname TEXT, \
+port TEXT, title TEXT, description TEXT, latitude TEXT, longitude TEXT)")
+    cursor.execute("CREATE TABLE sensor (id INTEGER PRIMARY KEY, sensor_id INTEGER, description TEXT, \
+thermometer_id INTEGER, FOREIGN KEY (thermometer_id) REFERENCES thermometer(id))")
+    cursor.execute("CREATE TABLE measurement (id INTEGER PRIMARY KEY, thermometer_id INTEGER, \
+sensor_id INTEGER, celsius TEXT, fahrenheit TEXT, humidity TEXT, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
+FOREIGN KEY (thermometer_id) REFERENCES thermometer(id), FOREIGN KEY (sensor_id) REFERENCES sensor(id))")
+
+    connect.commit()
+    connect.close()

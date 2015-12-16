@@ -41,11 +41,7 @@ APPLICATION_VERSION = "0.0.1 alpha"
 
 DEBUG_MODE = logging.INFO # Log mode
 CONFIGURATION_FILE = "./config.xml"
-DATABASE_FILE = "./measurement.db"
-LOG_FILE = "./hts.log"
-
 NOT_FOUND_FILE = "notfound.html"
-ASSETS_PREFIX = "./assets/"
 
 def application_motd():
     return str("Starting Temperature HUB server v " + APPLICATION_VERSION)
@@ -55,8 +51,10 @@ def init_logger():
     logger.setLevel(DEBUG_MODE)
     logFormatter = logging.Formatter("%(asctime)s [%(levelname)s] >> %(message)s")
 
+    configuration = get_configuration()
+
     # Rotating log file (Max size 5 MB)
-    fileHandler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=(1048576*5), backupCount=7)
+    fileHandler = logging.handlers.RotatingFileHandler(configuration.log_filename, maxBytes=(1048576*5), backupCount=7)
     fileHandler.setFormatter(logFormatter)
     logger.addHandler(fileHandler)
 
@@ -72,7 +70,6 @@ def get_configuration():
 
     configuration = conf.getConfiguration()
     configuration.filename = CONFIGURATION_FILE
-    configuration.database_filename = DATABASE_FILE
 
     return configuration
 
@@ -159,6 +156,7 @@ class ServerHandler(BaseHTTPRequestHandler):
         else:
             re_ex = re.compile("[/]{1}([A-Za-z]+)[?]{1}([A-Za-z]+)[=]{1}([\S]+)")
             re_match = re_ex.match(s.path)
+            configuration = get_configuration()
 
             if re_match:
                 params = re_match.groups()
@@ -166,13 +164,13 @@ class ServerHandler(BaseHTTPRequestHandler):
                 if params[0] == "assets" and params[1] == "filename":
                     file_path = params[2].replace("/../", "")
                     file_path = file_path.replace("../", "")
-                    file_path = ASSETS_PREFIX + file_path
+                    file_path = configuration.assets_path + file_path
 
                     if os.path.exists(file_path) and os.path.isfile(file_path):
                         s.send_response(200)
                     else:
                         s.send_response(404)
-                        file_path = ASSETS_PREFIX + NOT_FOUND_FILE
+                        file_path = configuration.assets_path + NOT_FOUND_FILE
 
                     loader = FileLoader(file_path)
                     mime = magic.Magic(mime=True)
@@ -186,7 +184,7 @@ class ServerHandler(BaseHTTPRequestHandler):
                     s.wfile.write(content)
             else:
                 s.send_response(404)
-                file_path = ASSETS_PREFIX + NOT_FOUND_FILE
+                file_path = configuration.assets_path + NOT_FOUND_FILE
 
                 loader = FileLoader(file_path)
                 mime = magic.Magic(mime=True)

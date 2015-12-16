@@ -26,6 +26,8 @@ class XMLCurrentState(object):
 
     def buildXML(self):
         self.root = ET.Element('response')
+        self.root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        self.root.set("xsi:noNamespaceSchemaLocation", "assets?filename=current_state.xsd")
         self.root.set("timestamp", datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
 
         connect = sqlite3.connect(self.configuration.database_filename)
@@ -57,7 +59,7 @@ longitude, id FROM thermometer WHERE thermometer_id = ? AND hostname = ? AND por
 
                 for sensor in dataSensor:
                     esensor = ET.SubElement(esensors, "sensor")
-                    esensor.set("id", str(sensor[0]))
+                    esensor.set("index", str(sensor[0]))
                     description = ET.SubElement(esensor, "description")
                     description.text = str(sensor[1])
 
@@ -145,7 +147,7 @@ longitude, id FROM thermometer WHERE thermometer_id = ? AND hostname = ? AND por
 
                 for sensor in dataSensor:
                     esensor = ET.SubElement(esensors, "sensor")
-                    esensor.set("id", str(sensor[0]))
+                    esensor.set("index", str(sensor[0]))
                     edescription = ET.SubElement(esensor, "description")
                     edescription.text = str(sensor[1])
 

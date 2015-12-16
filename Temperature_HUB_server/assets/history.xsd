@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:element name="response">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="thermometers" type="ThermometersType" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="filter" type="FilterType" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="values" type="ValuesType" minOccurs="1" maxOccurs="1" />
+            </xsd:sequence>
+            <xsd:attribute name="timestamp" type="TimestampType" use="required" />
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:simpleType name="TimestampType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="ThermometersType">
+        <xsd:sequence>
+            <xsd:element name="thermometer" type="ThermometerType" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:attribute name="count" type="xsd:integer" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="ThermometerType">
+        <xsd:sequence>
+            <xsd:element name="description" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="location" type="LocationType" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="sensors" type="SensorsType" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+        <xsd:attribute name="index" type="xsd:integer" use="required" />
+        <xsd:attribute name="title" type="xsd:string" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="LocationType">
+        <xsd:sequence>
+            <xsd:element name="latitude" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="longitude" type="xsd:string" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="SensorsType">
+        <xsd:sequence>
+            <xsd:element name="sensor" type="SensorType" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:attribute name="count" type="xsd:integer" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="SensorType">
+        <xsd:sequence>
+            <xsd:element name="description" type="xsd:string" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+        <xsd:attribute name="index" type="xsd:integer" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="FilterType">
+        <xsd:sequence>
+            <xsd:element name="from" type="TimestampType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="to" type="TimestampType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="thermometersids" type="ThermometerIdType" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="ThermometerIdType">
+        <xsd:sequence>
+            <xsd:element name="thermometerid" type="xsd:integer" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="ValuesType">
+        <xsd:sequence>
+            <xsd:element name="sensor" type="SensorValueType" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="SensorValueType">
+        <xsd:sequence>
+            <xsd:element name="value" type="ValueType" minOccurs="3" maxOccurs="3" />
+        </xsd:sequence>
+        <xsd:attribute name="sensorid" type="xsd:integer" use="required" />
+        <xsd:attribute name="thermometerid" type="xsd:integer" use="required" />
+        <xsd:attribute name="timestamp" type="TimestampType" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="ValueType">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="type" type="xsd:string" use="required" />
+                <xsd:attribute name="unit" type="xsd:string" use="required" />
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+</xsd:schema>

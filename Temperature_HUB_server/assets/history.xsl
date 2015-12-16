@@ -21,7 +21,7 @@
 
                 <hr />
                 <xsl:for-each select="sensors/sensor">
-                  Sensor #<xsl:value-of select="@id"/> - <small><xsl:value-of select="description"/></small><br />
+                  Sensor #<xsl:value-of select="@index"/> - <small><xsl:value-of select="description"/></small><br />
                 </xsl:for-each>
                 <hr />
             </xsl:for-each>
