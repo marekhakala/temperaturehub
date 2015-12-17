@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="config.xsd">
+  <server>
+    <listen>127.0.0.1</listen>
+    <port>9000</port>
+  </server>
+  <logfile>./hts.log</logfile>
+</config>

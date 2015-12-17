@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:element name="config">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="server" type="ServerType" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="logfile" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="ServerType">
+        <xsd:sequence>
+            <xsd:element name="listen" type="InetAddressType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="port" type="xsd:integer" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

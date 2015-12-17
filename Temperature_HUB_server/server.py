@@ -95,12 +95,12 @@ def load_configuration():
     # Init SQLite3 database
     logger.info("Checking SQLite3 database ...")
 
-    if not os.path.exists(DATABASE_FILE):
-        logger.error("SQLite3 database file " + DATABASE_FILE + " not found.")
-        logger.info("Creating SQLite3 database file " + DATABASE_FILE + " ...")
+    if not os.path.exists(configuration.database_filename):
+        logger.error("SQLite3 database file " + configuration.database_filename + " not found.")
+        logger.info("Creating SQLite3 database file " + configuration.database_filename + " ...")
         os.system("./init_db.py")
     else:
-        logger.info("SQLite3 database file " + DATABASE_FILE + ". OK")
+        logger.info("SQLite3 database file " + configuration.database_filename + ". OK")
 
     # Log - configuration info
     logger.info("Data sync time: " + configuration.updatetime + "s")
@@ -213,8 +213,6 @@ if __name__ == '__main__':
 
     if configuration == None:
         sys.exit(1)
-
-    #sync_data(None, configuration)
 
     # Start HTTP server & data sync
     try:

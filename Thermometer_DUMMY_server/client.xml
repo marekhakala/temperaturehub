@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<response>
+<response xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="client.xsd">
     <title>Temperature_1</title>
     <description>Temperature in flat.</description>
     <location>
         <latitude>50.0755381</latitude>
         <longitude>14.4378004</longitude>
     </location>
-    <sensors>
-        <sensor id="0">
+    <sensors count="2">
+        <sensor index="0">
             <description>indoor</description>
             <values count="3">
                 <value type="temperature" unit="celsius">15.66</value>
@@ -15,10 +16,11 @@
                 <value type="humidity" unit="percentage">24.50</value>
             </values>
         </sensor>
-        <sensor id="1">
+        <sensor index="1">
             <description>outdoor</description>
-            <values count="2">
+            <values count="3">
                 <value type="temperature" unit="celsius">12.07</value>
+                <value type="temperature" unit="fahrenheit">53.73</value>
                 <value type="humidity" unit="percentage">17.10</value>
             </values>
         </sensor>

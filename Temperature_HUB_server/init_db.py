@@ -34,7 +34,7 @@ def get_configuration():
 
 if __name__ == '__main__':
     # Load configuration from config.xml
-    configuration = load_configuration()
+    configuration = get_configuration()
 
     if configuration == None:
         sys.exit(1)
