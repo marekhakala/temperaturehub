@@ -133,69 +133,92 @@ class ServerHandler(BaseHTTPRequestHandler):
         s.end_headers()
 
     def do_GET(s):
+        configuration = get_configuration()
+        re_assets = re.compile("[/]{1}(assets)[?]?([A-Za-z]*)[=]?([\S]*)")
+        re_history = re.compile("[/]{1}(history)[?]?([A-Za-z]*)[=]?([\d]*)[&]?([A-Za-z]*)[=]?([\d]*)")
+
+        if re_assets.match(s.path):
+            params = re_assets.match(s.path).groups()
+        elif re_history.match(s.path):
+            params = re_history.match(s.path).groups()
+        else:
+            params = []
+
         if s.path == "/":
             s.send_response(200)
             s.send_header("Content-type", "text/xml")
             s.end_headers()
 
-            current_state = XMLCurrentState(get_configuration())
+            current_state = XMLCurrentState(configuration)
             current_state.buildXML()
             s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             s.wfile.write(b"<?xml-stylesheet type=\"text/xsl\" href=\"assets?filename=current_state.xsl\"?>")
             s.wfile.write(current_state.xml())
-        elif s.path == "/history":
-            s.send_response(200)
-            s.send_header("Content-type", "text/xml")
-            s.end_headers()
+        elif re_assets.match(s.path) and len(params) > 1 and params[0] == "assets" and params[1] == "filename":
+            file_path = params[2].replace("/../", "")
+            file_path = file_path.replace("../", "")
+            file_path = configuration.assets_path + file_path
 
-            history = XMLHistory(get_configuration())
-            history.buildXML()
-            s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-            s.wfile.write(b"<?xml-stylesheet type=\"text/xsl\" href=\"assets?filename=history.xsl\"?>")
-            s.wfile.write(history.xml())
-        else:
-            re_ex = re.compile("[/]{1}([A-Za-z]+)[?]{1}([A-Za-z]+)[=]{1}([\S]+)")
-            re_match = re_ex.match(s.path)
-            configuration = get_configuration()
-
-            if re_match:
-                params = re_match.groups()
-
-                if params[0] == "assets" and params[1] == "filename":
-                    file_path = params[2].replace("/../", "")
-                    file_path = file_path.replace("../", "")
-                    file_path = configuration.assets_path + file_path
-
-                    if os.path.exists(file_path) and os.path.isfile(file_path):
-                        s.send_response(200)
-                    else:
-                        s.send_response(404)
-                        file_path = configuration.assets_path + NOT_FOUND_FILE
-
-                    loader = FileLoader(file_path)
-                    mime = magic.Magic(mime=True)
-                    mime_type = mime.from_file(file_path).decode(encoding='UTF-8')
-                    s.send_header("Content-type", str(mime_type))
-
-                    loader.loadFile()
-                    content = loader.getContent()
-
-                    s.end_headers()
-                    s.wfile.write(content)
+            if os.path.exists(file_path) and os.path.isfile(file_path):
+                s.send_response(200)
             else:
                 s.send_response(404)
                 file_path = configuration.assets_path + NOT_FOUND_FILE
 
-                loader = FileLoader(file_path)
-                mime = magic.Magic(mime=True)
-                mime_type = mime.from_file(file_path).decode(encoding='UTF-8')
-                s.send_header("Content-type", str(mime_type))
+            loader = FileLoader(file_path)
+            mime = magic.Magic(mime=True)
+            mime_type = mime.from_file(file_path).decode(encoding='UTF-8')
+            s.send_header("Content-type", str(mime_type))
 
-                loader.loadFile()
-                content = loader.getContent()
+            loader.loadFile()
+            content = loader.getContent()
 
-                s.end_headers()
-                s.wfile.write(content)
+            s.end_headers()
+            s.wfile.write(content)
+        elif re_history.match(s.path) and params[0] == "history":
+            page = -1
+            thermometer = 1
+
+            temp_params = []
+            len_params = len(params)
+
+            if len_params > 2: temp_params.append((params[1], params[2]))
+            if len_params > 4: temp_params.append((params[3], params[4]))
+
+            for param in temp_params:
+                if param[0] == "thermometer":
+                    try:
+                        thermometer = int(param[1])
+                    except ValueError:
+                        thermometer = 1
+
+                elif param[0] == "page":
+                    try:
+                        page = int(param[1])
+                    except ValueError:
+                        page = -1
+
+            if thermometer < 1: thermometer = 1
+
+            history = XMLHistory(get_configuration())
+            history.buildXML(thermometer, page)
+            s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            s.wfile.write(b"<?xml-stylesheet type=\"text/xsl\" href=\"assets?filename=history.xsl\"?>")
+            s.wfile.write(history.xml())
+        else:
+            s.send_response(404)
+            file_path = configuration.assets_path + NOT_FOUND_FILE
+
+            loader = FileLoader(file_path)
+            mime = magic.Magic(mime=True)
+            mime_type = mime.from_file(file_path).decode(encoding='UTF-8')
+            s.send_header("Content-type", str(mime_type))
+
+            loader.loadFile()
+            content = loader.getContent()
+
+            s.end_headers()
+            s.wfile.write(content)
 
 class HandlerConfigurationWrapper(object):
     def __init__(self, configuration):

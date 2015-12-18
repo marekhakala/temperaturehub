@@ -10,6 +10,7 @@
   <assetspath>./assets/</assetspath>
   <historydays>5</historydays>
   <updatetime>10</updatetime>
+  <pagelimit>50</pagelimit>
   <thermometers>
     <thermometer>
       <hostname>127.0.0.1</hostname>

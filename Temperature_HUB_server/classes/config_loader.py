@@ -78,6 +78,7 @@ class ConfigLoader(object):
         entity.database_filename = self.root_element.find("databasefile").text
         entity.log_filename = self.root_element.find("logfile").text
         entity.assets_path = self.root_element.find("assetspath").text
+        entity.page_limit = int(self.root_element.find("pagelimit").text)
         entity.historydays = int(self.root_element.find("historydays").text)
         entity.hostname = self.root_element.find("server/listen").text
         entity.port = self.root_element.find("server/port").text

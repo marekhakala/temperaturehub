@@ -91,7 +91,7 @@ class ThermometerClient(object):
 
         for sensor in sensors:
             sensor_info = SensorInfo()
-            sensor_info.id = sensor.attrib["id"]
+            sensor_info.id = sensor.attrib["index"]
             sensor_info.description = sensor.find("description").text
             values = sensor.findall("values/value")
 
