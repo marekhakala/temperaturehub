@@ -12,13 +12,21 @@
             <h1>Temperature HUB - Current state</h1>
           </div>
           <div class="row text-center">
+            <hr />
             <p><b>Last update: </b> <xsl:value-of select="response/@timestamp"/> UTC | <a href="/" class="btn btn-xs btn-default">Update</a></p>
-            <p><a href="/" class="btn btn-xs btn-primary">Current state</a> | <a href="/history" class="btn btn-xs btn-primary">History</a></p>
+            <hr />
             <xsl:for-each select="response/thermometers/thermometer">
               <h3>
                 #<xsl:value-of select="@index"/> | <xsl:value-of select="@title"/>
                 <span class="label label-default">Lat: <xsl:value-of select="location/latitude"/>, Long: <xsl:value-of select="location/longitude"/>
-                </span>
+              </span> |
+                <xsl:element name="a">
+                  <xsl:attribute name="href">/history?thermometer=<xsl:value-of select="@index"/></xsl:attribute>
+                  <xsl:attribute name="class">
+                    btn btn-primary
+                  </xsl:attribute>
+                  History
+                </xsl:element>
               </h3>
               <i><xsl:value-of select="description"/></i>
               <hr />

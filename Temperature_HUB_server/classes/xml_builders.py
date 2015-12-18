@@ -27,8 +27,8 @@ class XMLCurrentState(object):
 
     def buildXML(self):
         self.root = ET.Element('response')
-        #self.root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-        #self.root.set("xsi:noNamespaceSchemaLocation", "assets?filename=current_state.xsd")
+        self.root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        self.root.set("xsi:noNamespaceSchemaLocation", "assets?filename=current_state.xsd")
         self.root.set("timestamp", datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
 
         connect = sqlite3.connect(self.configuration.database_filename)
@@ -112,11 +112,15 @@ class XMLHistory(object):
         self.root = None
         self.cursor = None
         self.thermometer_id = None
+        self.thermometer_index = None
         self.efilter_page = None
+        self.efilter_thermometer = None
         self.configuration = configuration
 
     def buildXML(self, thermometer_index, page):
         self.root = ET.Element('response')
+        self.root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        self.root.set("xsi:noNamespaceSchemaLocation", "assets?filename=history.xsd")
         self.root.set("timestamp", datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
 
         connect = sqlite3.connect(self.configuration.database_filename)
@@ -124,25 +128,22 @@ class XMLHistory(object):
 
         to_timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         from_timestamp = (datetime.utcnow() + timedelta(days=-self.configuration.historydays)).strftime("%Y-%m-%d %H:%M:%S")
+        self.thermometer_id = -1
 
-        thermometer_index -= 1
-        thermometer_id = -1
-        thermometers_count = 0
+        if thermometer_index >= len(self.configuration.thermometers):
+            thermometer_index = 0
 
-        if thermometer_index >= len(self.configuration.thermometers): thermometer_index = 0
-
-        self.buildThermometerValues(thermometer_index, thermometer_id)
+        self.buildThermometerValues(thermometer_index, self.thermometer_id)
         self.buildFilterValues(from_timestamp, to_timestamp)
-
-        if self.thermometer_id != None:
-            thermometer_id = self.thermometer_id
+        self.thermometer_index = str(thermometer_index)
+        self.efilter_thermometer.text = self.thermometer_index
 
         thermometers_ids = ET.SubElement(self.root, "thermometersids")
         epages = ET.SubElement(self.root, "pages")
         evalues = ET.SubElement(self.root, "values")
         self.buildThermometersIdValues(thermometers_ids, thermometer_index)
 
-        values = (thermometer_id, str(from_timestamp), str(to_timestamp),)
+        values = (self.thermometer_id, str(from_timestamp), str(to_timestamp),)
         self.buildValues(epages, evalues, values, page)
 
     def buildThermometersIdValues(self, thermometers_ids, thermometer_index):
@@ -183,6 +184,7 @@ class XMLHistory(object):
     def buildFilterValues(self, from_timestamp, to_timestamp):
         efilter = ET.SubElement(self.root, "filter")
         self.efilter_page = ET.SubElement(efilter, "page")
+        self.efilter_thermometer = ET.SubElement(efilter, "thermometer")
 
         efilter_from = ET.SubElement(efilter, "from")
         efilter_from.text = str(from_timestamp)
@@ -264,11 +266,13 @@ WHERE m.thermometer_id = ? AND m.timestamp >= ? AND m.timestamp <= ? LIMIT ? OFF
 
         if pages_from != 1:
             epage = ET.SubElement(epages, "page")
+            epage.set("thermometer", str(self.thermometer_index))
             epage.set("index", str(pages_from - 1))
             epage.text = "Prev"
 
         for page_index in range(pages_from, min(pages_to + 1, pages_count + 1)):
             epage = ET.SubElement(epages, "page")
+            epage.set("thermometer", str(self.thermometer_index))
             epage.set("index", str(page_index))
             epage.text = str(page_index)
 
@@ -277,6 +281,7 @@ WHERE m.thermometer_id = ? AND m.timestamp >= ? AND m.timestamp <= ? LIMIT ? OFF
 
         if pages_to < pages_count:
             epage = ET.SubElement(epages, "page")
+            epage.set("thermometer", str(self.thermometer_index))
             epage.set("index", str(pages_to + 1))
             epage.text = "Next"
 

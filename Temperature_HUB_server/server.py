@@ -177,7 +177,7 @@ class ServerHandler(BaseHTTPRequestHandler):
             s.wfile.write(content)
         elif re_history.match(s.path) and params[0] == "history":
             page = -1
-            thermometer = 1
+            thermometer = 0
 
             temp_params = []
             len_params = len(params)
@@ -190,7 +190,7 @@ class ServerHandler(BaseHTTPRequestHandler):
                     try:
                         thermometer = int(param[1])
                     except ValueError:
-                        thermometer = 1
+                        thermometer = 0
 
                 elif param[0] == "page":
                     try:
@@ -198,7 +198,7 @@ class ServerHandler(BaseHTTPRequestHandler):
                     except ValueError:
                         page = -1
 
-            if thermometer < 1: thermometer = 1
+            if thermometer < 0: thermometer = 0
 
             history = XMLHistory(get_configuration())
             history.buildXML(thermometer, page)
