@@ -210,7 +210,7 @@ WHERE m.thermometer_id = ? AND m.timestamp >= ? AND m.timestamp <= ?", values)
         data = self.cursor.fetchall()
         float_round_up = lambda number: int(number + 1) if int(number) != number else int(number)
 
-        pages_limit = 10
+        pages_limit = self.configuration.pages_limit
         values_count = int(data[0][0])
         pages_count = float_round_up(float(values_count) / int(self.configuration.page_limit))
 

@@ -39,6 +39,8 @@ class ConfigEntity(object):
         self.updatetime = None
         self.historydays = None
         self.filename = None
+        self.page_limit = None
+        self.pages_limit = None
         self.database_filename = None
         self.log_filename = None
         self.assets_path = None
@@ -79,6 +81,7 @@ class ConfigLoader(object):
         entity.log_filename = self.root_element.find("logfile").text
         entity.assets_path = self.root_element.find("assetspath").text
         entity.page_limit = int(self.root_element.find("pagelimit").text)
+        entity.pages_limit = int(self.root_element.find("pageslimit").text)
         entity.historydays = int(self.root_element.find("historydays").text)
         entity.hostname = self.root_element.find("server/listen").text
         entity.port = self.root_element.find("server/port").text

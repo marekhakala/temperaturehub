@@ -11,6 +11,7 @@
   <historydays>5</historydays>
   <updatetime>10</updatetime>
   <pagelimit>50</pagelimit>
+  <pageslimit>10</pageslimit>
   <thermometers>
     <thermometer>
       <hostname>127.0.0.1</hostname>

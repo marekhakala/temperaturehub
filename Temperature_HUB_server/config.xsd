@@ -10,6 +10,7 @@
                 <xsd:element name="historydays" type="xsd:integer" minOccurs="1" maxOccurs="1" />
                 <xsd:element name="updatetime" type="xsd:integer" minOccurs="1" maxOccurs="1" />
                 <xsd:element name="pagelimit" type="xsd:integer" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="pageslimit" type="xsd:integer" minOccurs="1" maxOccurs="1" />
                 <xsd:element name="thermometers" type="ThermometersType" minOccurs="1" maxOccurs="1" />
             </xsd:sequence>
         </xsd:complexType>
