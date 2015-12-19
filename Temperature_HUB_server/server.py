@@ -33,6 +33,7 @@ sys.path.append(os.path.abspath("./classes/"))
 from config_loader import *
 from thermometer_client import *
 from xml_builders import *
+from xml_validator import *
 from file_loader import *
 
 # Configuration
@@ -120,10 +121,21 @@ def sync_data(sc, configuration):
     # Data sync from thermometers
     for thermometer in configuration.thermometers:
         tc = ThermometerClient(configuration, thermometer)
-        data = tc.fetchData()
+        dataSchema = tc.fetchDataSchema()
 
-        if data != None:
-            tc.saveToDatabase(data, tc.getThermometerId(data))
+        if dataSchema != None:
+            data = tc.fetchData()
+
+            if data != None:
+                xmlValidator = XMLValidator(dataSchema)
+
+                if xmlValidator.validate(data):
+                    configuration.logger.error("Thermometer|" + str(tc.thermometer["hostname"])
+                    + ":" + str(tc.thermometer["port"]) + "|XML validation: OK")
+                    tc.saveToDatabase(tc.parseData(data), tc.getThermometerId(tc.parseData(data)))
+                else:
+                    configuration.logger.error("Thermometer|" + str(tc.thermometer["hostname"])
+                    + ":" + str(tc.thermometer["port"]) + "|XML validation: FAIL")
 
     # Add next run batch
     sc.enter(float(configuration.updatetime), 1, sync_data, (sc,configuration,))

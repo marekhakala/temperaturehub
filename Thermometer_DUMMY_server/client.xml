@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <response xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="client.xsd">
+    xsi:noNamespaceSchemaLocation="schema.xsd">
     <title>Temperature_1</title>
     <description>Temperature in flat.</description>
     <location>

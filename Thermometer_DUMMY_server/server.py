@@ -112,7 +112,7 @@ class ServerHandler(BaseHTTPRequestHandler):
         s.send_header("Content-type", "text/xml")
         s.end_headers()
 
-        if s.path == "/client.xsd":
+        if s.path == "/schema.xsd":
             loader = FileLoader("./client.xsd")
         else:
             loader = FileLoader("./client.xml")

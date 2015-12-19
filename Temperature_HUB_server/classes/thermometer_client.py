@@ -55,6 +55,28 @@ class ThermometerClient(object):
         self.configuration = configuration
         self.thermometer = thermometer
 
+    def fetchDataSchema(self):
+        try:
+            connection = http.client.HTTPConnection(self.thermometer["hostname"],
+                                                self.thermometer["port"],
+                                                timeout = 12)
+            connection.request('GET', '/schema.xsd')
+            response = connection.getresponse()
+
+            if response.status == 200:
+                self.configuration.logger.info("Thermometer|" + str(self.thermometer["hostname"])
+                + ":" + str(self.thermometer["port"]) + "|XML schema")
+                response_source = response.read().decode("utf-8")
+                connection.close()
+                return response_source
+
+            connection.close();
+
+        except Exception as e:
+            self.configuration.logger.error("Thermometer|" + str(self.thermometer["hostname"])
+            + ":" + str(self.thermometer["port"]) + "|XML schema: " + str(e))
+            return None
+
     def fetchData(self):
         try:
             connection = http.client.HTTPConnection(self.thermometer["hostname"],
@@ -65,22 +87,20 @@ class ThermometerClient(object):
 
             if response.status == 200:
                 self.configuration.logger.info("Thermometer|" + str(self.thermometer["hostname"])
-                + ":" + str(self.thermometer["port"]) + ": OK")
-                response_source = response.read().decode()
-                connection.close();
-                data = self.parseData(response_source)
-                return data
+                + ":" + str(self.thermometer["port"]) + "|XML data")
+                response_source = response.read().decode("utf-8")
+                connection.close()
+                return response_source
 
             connection.close();
 
         except Exception as e:
             self.configuration.logger.error("Thermometer|" + str(self.thermometer["hostname"])
-            + ":" + str(self.thermometer["port"]) + ": " + str(e))
+            + ":" + str(self.thermometer["port"]) + "|XML data: " + str(e))
             return None
 
     def parseData(self, data):
         root = ET.fromstring(data)
-        # TODO: XML schema validation
 
         info = ThermometerInfo()
         info.id = self.thermometer["id"]
