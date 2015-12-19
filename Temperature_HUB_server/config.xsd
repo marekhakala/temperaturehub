@@ -4,17 +4,24 @@
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element name="server" type="ServerType" minOccurs="1" maxOccurs="1" />
-                <xsd:element name="databasefile" type="xsd:string" minOccurs="1" maxOccurs="1" />
-                <xsd:element name="logfile" type="xsd:string" minOccurs="1" maxOccurs="1" />
-                <xsd:element name="assetspath" type="xsd:string" minOccurs="1" maxOccurs="1" />
-                <xsd:element name="historydays" type="xsd:integer" minOccurs="1" maxOccurs="1" />
-                <xsd:element name="updatetime" type="xsd:integer" minOccurs="1" maxOccurs="1" />
-                <xsd:element name="pagelimit" type="xsd:integer" minOccurs="1" maxOccurs="1" />
-                <xsd:element name="pageslimit" type="xsd:integer" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="databasefile" type="DatabaseFileType" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="logfile" type="LogFileType" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="assetspath" type="AssetsPathType" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="historydays" type="HistoryDaysType" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="updatetime" type="UpdateTimeType" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="pagelimit" type="PageLimitType" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="pageslimit" type="PagesLimitType" minOccurs="1" maxOccurs="1" />
                 <xsd:element name="thermometers" type="ThermometersType" minOccurs="1" maxOccurs="1" />
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
+
+    <xsd:complexType name="ServerType">
+        <xsd:sequence>
+            <xsd:element name="listen" type="InetAddressType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="port" type="PortType" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
 
     <xsd:simpleType name="InetAddressType">
         <xsd:restriction base="xsd:string">
@@ -22,12 +29,37 @@
         </xsd:restriction>
     </xsd:simpleType>
 
-    <xsd:complexType name="ServerType">
-        <xsd:sequence>
-            <xsd:element name="listen" type="InetAddressType" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="port" type="xsd:integer" minOccurs="1" maxOccurs="1" />
-        </xsd:sequence>
-    </xsd:complexType>
+    <xsd:simpleType name="PortType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="DatabaseFileType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="LogFileType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="AssetsPathType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="HistoryDaysType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="UpdateTimeType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="PageLimitType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="PagesLimitType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
 
     <xsd:complexType name="ThermometersType">
         <xsd:sequence>
@@ -38,7 +70,11 @@
     <xsd:complexType name="ThermometerType">
         <xsd:sequence>
             <xsd:element name="hostname" type="InetAddressType" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="port" type="xsd:integer" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="port" type="ThermometerPortType" minOccurs="1" maxOccurs="1" />
         </xsd:sequence>
     </xsd:complexType>
+
+    <xsd:simpleType name="ThermometerPortType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
 </xsd:schema>

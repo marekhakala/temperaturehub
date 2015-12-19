@@ -1,15 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <xsd:element name="response">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="thermometers" type="ThermometersType" minOccurs="1" maxOccurs="1" />
-                <xsd:element name="filter" type="FilterType" minOccurs="1" maxOccurs="1" />
-                <xsd:element name="values" type="ValuesType" minOccurs="1" maxOccurs="1" />
-            </xsd:sequence>
-            <xsd:attribute name="timestamp" type="TimestampType" use="required" />
-        </xsd:complexType>
-    </xsd:element>
+    <xsd:element name="response" type="ResponseType" />
+
+    <xsd:complexType name="ResponseType">
+        <xsd:sequence>
+            <xsd:element name="thermometer" type="ThermometerType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="filter" type="FilterType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="thermometersids" type="ThermometerIdType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="pages" type="PagesType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="values" type="ValuesType" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+        <xsd:attribute name="timestamp" type="TimestampType" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="ThermometerType">
+        <xsd:sequence>
+            <xsd:element name="description" type="ThermometerDescriptionType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="location" type="LocationType" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="sensors" type="SensorsType" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+        <xsd:attribute name="index" type="ThermometerIndexType" use="required" />
+        <xsd:attribute name="title" type="ThermometerTitleType" use="required" />
+    </xsd:complexType>
+
+    <xsd:simpleType name="ThermometerDescriptionType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:complexType name="LocationType">
+        <xsd:sequence>
+            <xsd:element name="latitude" type="LocationLatitudeType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="longitude" type="LocationLongitudeType" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:simpleType name="LocationLatitudeType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="LocationLongitudeType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:complexType name="SensorsType">
+        <xsd:sequence>
+            <xsd:element name="sensor" type="SensorType" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:attribute name="count" type="SensorsCountType" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="SensorType">
+        <xsd:sequence>
+            <xsd:element name="description" type="SensorDescriptionType" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+        <xsd:attribute name="index" type="SensorIndexType" use="required" />
+    </xsd:complexType>
+
+    <xsd:simpleType name="SensorDescriptionType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="SensorIndexType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="SensorsCountType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="ThermometerIndexType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="ThermometerTitleType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:complexType name="FilterType">
+        <xsd:sequence>
+            <xsd:element name="page" type="FilterPageType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="thermometer" type="FilterThermometerType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="from" type="TimestampType" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="to" type="TimestampType" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:simpleType name="FilterPageType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="FilterThermometerType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
 
     <xsd:simpleType name="TimestampType">
         <xsd:restriction base="xsd:string">
@@ -17,79 +99,94 @@
         </xsd:restriction>
     </xsd:simpleType>
 
-    <xsd:complexType name="ThermometersType">
-        <xsd:sequence>
-            <xsd:element name="thermometer" type="ThermometerType" minOccurs="0" maxOccurs="unbounded" />
-        </xsd:sequence>
-        <xsd:attribute name="count" type="xsd:integer" use="required" />
-    </xsd:complexType>
-
-    <xsd:complexType name="ThermometerType">
-        <xsd:sequence>
-            <xsd:element name="description" type="xsd:string" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="location" type="LocationType" minOccurs="0" maxOccurs="1" />
-            <xsd:element name="sensors" type="SensorsType" minOccurs="1" maxOccurs="1" />
-        </xsd:sequence>
-        <xsd:attribute name="index" type="xsd:integer" use="required" />
-        <xsd:attribute name="title" type="xsd:string" use="required" />
-    </xsd:complexType>
-
-    <xsd:complexType name="LocationType">
-        <xsd:sequence>
-            <xsd:element name="latitude" type="xsd:string" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="longitude" type="xsd:string" minOccurs="1" maxOccurs="1" />
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:complexType name="SensorsType">
-        <xsd:sequence>
-            <xsd:element name="sensor" type="SensorType" minOccurs="0" maxOccurs="unbounded" />
-        </xsd:sequence>
-        <xsd:attribute name="count" type="xsd:integer" use="required" />
-    </xsd:complexType>
-
-    <xsd:complexType name="SensorType">
-        <xsd:sequence>
-            <xsd:element name="description" type="xsd:string" minOccurs="1" maxOccurs="1" />
-        </xsd:sequence>
-        <xsd:attribute name="index" type="xsd:integer" use="required" />
-    </xsd:complexType>
-
-    <xsd:complexType name="FilterType">
-        <xsd:sequence>
-            <xsd:element name="from" type="TimestampType" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="to" type="TimestampType" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="thermometersids" type="ThermometerIdType" minOccurs="1" maxOccurs="1" />
-        </xsd:sequence>
-    </xsd:complexType>
-
     <xsd:complexType name="ThermometerIdType">
         <xsd:sequence>
-            <xsd:element name="thermometerid" type="xsd:integer" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="thermometerid" type="ThermometerIdIndexType" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
+
+    <xsd:complexType name="ThermometerIdIndexType">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:integer">
+                <xsd:attribute name="current" type="ThermometerIdIndexCurrentType" />
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="ThermometerIdIndexCurrentType">
+        <xsd:restriction base="xsd:boolean" />
+    </xsd:simpleType>
+
+    <xsd:complexType name="PagesType">
+        <xsd:sequence>
+            <xsd:element name="page" type="PagesPageType" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="PagesPageType">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="current" type="PagesPageCurrentType" />
+                <xsd:attribute name="index" type="PagesPageIndexType" use="required" />
+                <xsd:attribute name="thermometer" type="PagesPageThermometerType" use="required" />
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="PagesPageCurrentType">
+        <xsd:restriction base="xsd:boolean" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="PagesPageIndexType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="PagesPageThermometerType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
 
     <xsd:complexType name="ValuesType">
         <xsd:sequence>
             <xsd:element name="sensor" type="SensorValueType" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
+        <xsd:attribute name="pages" type="ValuesPagesType" use="required" />
+        <xsd:attribute name="count" type="ValuesCountType" use="required" />
     </xsd:complexType>
 
     <xsd:complexType name="SensorValueType">
         <xsd:sequence>
             <xsd:element name="value" type="ValueType" minOccurs="3" maxOccurs="3" />
         </xsd:sequence>
-        <xsd:attribute name="sensorid" type="xsd:integer" use="required" />
-        <xsd:attribute name="thermometerid" type="xsd:integer" use="required" />
+        <xsd:attribute name="sensorid" type="SensorValueSensorIdType" use="required" />
         <xsd:attribute name="timestamp" type="TimestampType" use="required" />
     </xsd:complexType>
 
     <xsd:complexType name="ValueType">
         <xsd:simpleContent>
             <xsd:extension base="xsd:string">
-                <xsd:attribute name="type" type="xsd:string" use="required" />
-                <xsd:attribute name="unit" type="xsd:string" use="required" />
+                <xsd:attribute name="type" type="ValueTypeType" use="required" />
+                <xsd:attribute name="unit" type="ValueUnitType" use="required" />
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
+
+    <xsd:simpleType name="ValueTypeType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="ValueUnitType">
+        <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="SensorValueSensorIdType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="ValuesPagesType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="ValuesCountType">
+        <xsd:restriction base="xsd:integer" />
+    </xsd:simpleType>
 </xsd:schema>
