@@ -132,7 +132,8 @@ def sync_data(sc, configuration):
                 if xmlValidator.validate(data):
                     configuration.logger.error("Thermometer|" + str(tc.thermometer["hostname"])
                     + ":" + str(tc.thermometer["port"]) + "|XML validation: OK")
-                    tc.saveToDatabase(tc.parseData(data), tc.getThermometerId(tc.parseData(data)))
+                    pdata = tc.parseData(data)
+                    tc.saveToDatabase(pdata, tc.getThermometerId(pdata))
                 else:
                     configuration.logger.error("Thermometer|" + str(tc.thermometer["hostname"])
                     + ":" + str(tc.thermometer["port"]) + "|XML validation: FAIL")
