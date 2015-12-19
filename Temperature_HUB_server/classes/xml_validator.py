@@ -14,7 +14,6 @@
 #
 
 import re
-from io import StringIO
 from lxml import etree
 
 def remove_encoding(xml_root):
@@ -22,8 +21,7 @@ def remove_encoding(xml_root):
 
 class XMLValidator(object):
     def __init__(self, xmlschema_root):
-        e = etree.fromstring(remove_encoding(xmlschema_root))
-        self.xml_schema = etree.XMLSchema(e)
+        self.xml_schema = etree.XMLSchema(etree.fromstring(remove_encoding(xmlschema_root)))
         self.xml_parser = etree.XMLParser(schema=self.xml_schema)
 
     def validate(self, xml_root):
