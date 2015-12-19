@@ -46,23 +46,19 @@ NOT_FOUND_FILE = "notfound.html"
 def application_motd():
     return str("Starting Temperature HUB server v " + APPLICATION_VERSION)
 
-def init_logger():
+def init_console_logger():
     logger = logging.getLogger(APPLICATION_NAME)
     logger.setLevel(DEBUG_MODE)
     logFormatter = logging.Formatter("%(asctime)s [%(levelname)s] >> %(message)s")
-
-    configuration = get_configuration()
-
-    # Rotating log file (Max size 5 MB)
-    fileHandler = logging.handlers.RotatingFileHandler(configuration.log_filename, maxBytes=(1048576*5), backupCount=7)
-    fileHandler.setFormatter(logFormatter)
-    logger.addHandler(fileHandler)
 
     # Console log
     streamHandler = logging.StreamHandler()
     streamHandler.setFormatter(logFormatter)
     logger.addHandler(streamHandler)
     return logger
+
+def get_logger():
+    return logging.getLogger(APPLICATION_NAME)
 
 def get_configuration():
     conf = ConfigLoader(CONFIGURATION_FILE)
@@ -75,7 +71,7 @@ def get_configuration():
 
 def load_configuration():
     # Init logger
-    logger = init_logger()
+    logger = init_console_logger()
 
     # Print application MOTD
     print("------------------------------------------------------------------------------------")
@@ -89,8 +85,18 @@ def load_configuration():
         logger.error("Configuration file " + CONFIGURATION_FILE + " not found.")
         return None
 
-    configuration = get_configuration()
-    configuration.logger = logger
+    try:
+        configuration = get_configuration()
+    except etree.XMLSyntaxError as error:
+        if logger != None:
+            logger.error("File config.xml: " + str(error))
+        return None
+
+    if configuration == None:
+        return None
+
+    configuration.initFileLogger(logger)
+    logger = configuration.logger
 
     # Init SQLite3 database
     logger.info("Checking SQLite3 database ...")
@@ -134,6 +140,8 @@ class ServerHandler(BaseHTTPRequestHandler):
 
     def do_GET(s):
         configuration = get_configuration()
+        configuration.logger = get_logger()
+
         re_assets = re.compile("[/]{1}(assets)[?]?([A-Za-z]*)[=]?([\S]*)")
         re_history = re.compile("[/]{1}(history)[?]?([A-Za-z]*)[=]?([\d]*)[&]?([A-Za-z]*)[=]?([\d]*)")
 
@@ -200,7 +208,7 @@ class ServerHandler(BaseHTTPRequestHandler):
 
             if thermometer < 0: thermometer = 0
 
-            history = XMLHistory(get_configuration())
+            history = XMLHistory(configuration)
             history.buildXML(thermometer, page)
             s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             s.wfile.write(b"<?xml-stylesheet type=\"text/xsl\" href=\"assets?filename=history.xsl\"?>")

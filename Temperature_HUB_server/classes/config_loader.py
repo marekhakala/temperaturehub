@@ -13,6 +13,10 @@
 #    limitations under the License.
 #
 
+import logging
+import logging.handlers
+
+from lxml import etree
 import xml.etree.ElementTree as ET
 
 class ConfigEntitySingleton:
@@ -36,15 +40,31 @@ class ConfigEntity(object):
     def __init__(self):
         self.hostname = None
         self.port = None
+
         self.updatetime = None
         self.historydays = None
         self.filename = None
+
         self.page_limit = None
         self.pages_limit = None
+
         self.database_filename = None
         self.log_filename = None
+        self.logger = None
+
         self.assets_path = None
         self.thermometers = []
+
+    def initFileLogger(self, logger):
+        logFormatter = logging.Formatter("%(asctime)s [%(levelname)s] >> %(message)s")
+
+        if self.log_filename != None and logger != None:
+            # Rotating log file (Max size 5 MB)
+            fileHandler = logging.handlers.RotatingFileHandler(self.log_filename, maxBytes=(1048576*5), backupCount=7)
+            fileHandler.setFormatter(logFormatter)
+
+            logger.addHandler(fileHandler)
+            self.logger = logger
 
     def addThermometer(self, thermometer):
         self.thermometers.append(thermometer)
@@ -65,14 +85,33 @@ class ConfigEntity(object):
 
         return output
 
+class XMLFileValidator(object):
+    def __init__(self, schema_filename):
+        self.schema_filename = schema_filename
+
+        with open(self.schema_filename, 'rb') as xml_file:
+            xmlschema_root = etree.XML(xml_file.read())
+
+        self.xml_schema = etree.XMLSchema(xmlschema_root)
+        self.xml_parser = etree.XMLParser(schema=self.xml_schema)
+
+    def validate(self, xml_filename):
+        try:
+            with open(xml_filename, 'rb') as xml_file:
+                etree.fromstring(xml_file.read(), self.xml_parser)
+            return True
+        except etree.XMLSchemaError:
+            return False
+
 class ConfigLoader(object):
     def __init__(self, filename):
         self.filename = filename
         self.configSingleton = ConfigEntitySingleton(ConfigEntity)
 
     def loadFile(self):
+        validator = XMLFileValidator(self.filename + ".xsd")
+        validator.validate(self.filename)
         self.root_element = ET.parse(self.filename).getroot()
-        # TODO: XML schema validation
 
     def getConfiguration(self):
         entity = self.configSingleton()

@@ -43,17 +43,10 @@ CONFIGURATION_FILE = "./config.xml"
 def application_motd():
     return str("Starting Thermometer DUMMY server v " + APPLICATION_VERSION)
 
-def init_logger():
+def init_console_logger():
     logger = logging.getLogger(APPLICATION_NAME)
     logger.setLevel(DEBUG_MODE)
     logFormatter = logging.Formatter("%(asctime)s [%(levelname)s] >> %(message)s")
-
-    configuration = get_configuration()
-
-    # Rotating log file (Max size 5 MB)
-    fileHandler = logging.handlers.RotatingFileHandler(configuration.log_filename, maxBytes=(1048576*5), backupCount=7)
-    fileHandler.setFormatter(logFormatter)
-    logger.addHandler(fileHandler)
 
     # Console log
     streamHandler = logging.StreamHandler()
@@ -72,7 +65,7 @@ def get_configuration():
 
 def load_configuration():
     # Init logger
-    logger = init_logger()
+    logger = init_console_logger()
 
     # Print application MOTD
     print("-------------------------------------------------------------------------------------")
@@ -86,8 +79,18 @@ def load_configuration():
         logger.error("Configuration file " + CONFIGURATION_FILE + " not found.")
         return None
 
-    configuration = get_configuration()
-    configuration.logger = logger
+    try:
+        configuration = get_configuration()
+    except etree.XMLSyntaxError as error:
+        if logger != None:
+            logger.error("File config.xml: " + str(error))
+        return None
+
+    if configuration == None:
+        return None
+
+    configuration.initFileLogger(logger)
+    logger = configuration.logger
 
     # Log - configuration info
     logger.info("Configuration loaded")
