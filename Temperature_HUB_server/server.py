@@ -130,7 +130,7 @@ def sync_data(sc, configuration):
                 xmlValidator = XMLValidator(dataSchema)
 
                 if xmlValidator.validate(data):
-                    configuration.logger.error("Thermometer|" + str(tc.thermometer["hostname"])
+                    configuration.logger.info("Thermometer|" + str(tc.thermometer["hostname"])
                     + ":" + str(tc.thermometer["port"]) + "|XML validation: OK")
                     pdata = tc.parseData(data)
                     tc.saveToDatabase(pdata, tc.getThermometerId(pdata))
@@ -187,8 +187,8 @@ class ServerHandler(BaseHTTPRequestHandler):
                 file_path = configuration.assets_path + NOT_FOUND_FILE
 
             loader = FileLoader(file_path)
-            mime = magic.Magic(mime=True)
-            mime_type = mime.from_file(file_path).decode(encoding='UTF-8')
+            mime = magic.Magic()
+            mime_type = mime.from_file(file_path)
             s.send_header("Content-type", str(mime_type))
 
             loader.loadFile()
@@ -223,6 +223,11 @@ class ServerHandler(BaseHTTPRequestHandler):
 
             history = XMLHistory(configuration)
             history.buildXML(thermometer, page)
+
+            s.send_response(200)
+            s.send_header("Content-type", "text/xml")
+            s.end_headers()
+
             s.wfile.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             s.wfile.write(b"<?xml-stylesheet type=\"text/xsl\" href=\"assets?filename=history.xsl\"?>")
             s.wfile.write(history.xml())
@@ -231,8 +236,8 @@ class ServerHandler(BaseHTTPRequestHandler):
             file_path = configuration.assets_path + NOT_FOUND_FILE
 
             loader = FileLoader(file_path)
-            mime = magic.Magic(mime=True)
-            mime_type = mime.from_file(file_path).decode(encoding='UTF-8')
+            mime = magic.Magic()
+            mime_type = mime.from_file(file_path)
             s.send_header("Content-type", str(mime_type))
 
             loader.loadFile()
