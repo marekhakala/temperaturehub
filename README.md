@@ -50,9 +50,9 @@ Clone this repository and after install required packages for your operation sys
 
 ## Configuration (config.xml)
 
-`<?xml version="1.0" encoding="UTF-8"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="config.xsd">
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
   <server>
     <listen>0.0.0.0</listen>
     <port>8000</port>
@@ -75,7 +75,8 @@ Clone this repository and after install required packages for your operation sys
     </thermometer>
     <!-- Add another thermometer -->
   </thermometers>
-</config>`
+</config>
+```
 
 ## Run
 
