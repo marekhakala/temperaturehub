@@ -2,11 +2,9 @@
 
 ![TemperatureHUB Logo](temperaturehub.png)
 
-TemperatureHUB is Python3 application for downloading temperature / humidity values
-from remote weather stations that are located on the local network.
+The TemperatureHUB is the Python3 application for downloading temperature/humidity values from remote weather stations that located on the local network.
 
-Application contain server part and client example part. Server application provide
-HTTP server with XML data that can be displayed in web browser by XSLT transformation.
+The application contains server part and client example part. Server application provides HTTP server with XML data that can display in a web browser by XSLT transformation.
 
 [Screenshots](Screenshots/)
 
