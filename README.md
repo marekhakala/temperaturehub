@@ -1,10 +1,8 @@
-# TemperatureHUB 1.0.0 (XML API)
+# Temperature HUB v1.0.0 (XML API)
 
-![TemperatureHUB Logo](temperaturehub.png)
+![Temperature HUB Logo](Screenshots/temperaturehub.png)
 
-The TemperatureHUB is the Python3 application for downloading temperature/humidity values from remote weather stations that located on the local network.
-
-The application contains server part and client example part. Server application provides HTTP server with XML data that can display in a web browser by XSLT transformation.
+The Temperature HUB is an application for collecting temperature and humidity values from internet weather stations. The application is written in Python3 and includes HTTP server, which provides data presentation in a web browser with XSLT transformation for a better user experience.
 
 [Screenshots](Screenshots/)
 
